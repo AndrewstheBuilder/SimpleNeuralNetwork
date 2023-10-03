@@ -1,20 +1,13 @@
-from perceptron import Perceptron
 import matplotlib.pyplot as plt
 import numpy as np
+import sklearn
+import sklearn.datasets
+import sklearn.linear_model
+from planar_utils import plot_decision_boundary
 
 # Set the seed
-np.random.seed(1)
-# random.seed(123456)
+np.random.seed(2)
 
-# Constants
-WIDTH, HEIGHT = 600, 600
-
-# Randomly generate line's slope and intercept
-m = np.random.uniform(-1, 1)
-b = np.random.uniform(HEIGHT // 4, HEIGHT // 2)
-
-# define a Perceptron
-ptron = Perceptron(3, HEIGHT)
 
 def load_planar_dataset():
     """
@@ -22,7 +15,7 @@ def load_planar_dataset():
     """
     np.random.seed(1)
     m = 400  # number of examples
-    N = int(m/4)  # number of points per class
+    N = int(m/2)  # number of points per class
     D = 2  # dimensionality
     X = np.zeros((m, D))  # data matrix where each row is a single example
     # labels vector (0 for red, 1 for blue)
@@ -41,6 +34,7 @@ def load_planar_dataset():
 
     return X, Y
 
+
 def visualize_dataset(X, Y):
     print('X', X.shape)
     print('Y', Y.shape)
@@ -53,7 +47,7 @@ def visualize_dataset(X, Y):
     counts = [count_0, count_1]
     print('counts_0', count_0)
     print('count_1', count_1)
-    fig, ax = plt.subplots(figsize=(6,5)) # width: 5 inches, height: 3 inches
+    fig, ax = plt.subplots(figsize=(6, 5))  # width: 5 inches, height: 3 inches
     bars = ax.bar(labels, counts, color=['red', 'blue'])
     ax.set_title('Count of 0s and 1s in Specified Ranges')
     ax.set_xlabel('Element')
@@ -73,8 +67,23 @@ def visualize_dataset(X, Y):
 
     plt.show()
 
-X, Y = load_planar_dataset()
-visualize_dataset(X, Y)
 
-# Run the perceptron on this dataset
-X[0, :]
+X, Y = load_planar_dataset()
+print('X.shape',X.shape)
+print('Y.shape',Y.shape)
+
+# Train the logistic regression classifier
+clf = sklearn.linear_model.LogisticRegressionCV()
+clf.fit(X.T, Y[0])
+
+# Plot the decision boundary for logistic regression
+plot_decision_boundary(lambda x: clf.predict(x), X, Y)
+plt.show()
+plt.title("Logistic Regression")
+
+# Print accuracy
+LR_predictions = clf.predict(X.T)
+true1s = np.dot(Y, LR_predictions) # Correctly labeled 1s
+true0s = np.dot(1-Y, 1-LR_predictions) # Correctly labeled 0s
+print('Accuracy of logistic regression: %d ' % float((true1s + true0s)/float(Y.size)*100) +
+      '% ' + "(percentage of correctly labelled datapoints)")
