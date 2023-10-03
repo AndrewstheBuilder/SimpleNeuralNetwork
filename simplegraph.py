@@ -73,6 +73,7 @@ print('X.shape',X.shape)
 print('Y.shape',Y.shape)
 
 # Train the logistic regression classifier
+# Logistic Regression sets a baseline for our Neural Network to beat
 clf = sklearn.linear_model.LogisticRegressionCV()
 clf.fit(X.T, Y[0])
 
