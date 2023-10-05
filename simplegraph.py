@@ -3,7 +3,7 @@ import numpy as np
 import sklearn
 import sklearn.datasets
 import sklearn.linear_model
-from planar_utils import plot_decision_boundary
+from planar_utils import plot_decision_boundary, load_extra_datasets
 from simpleneuralnetwork import Model
 import json
 
@@ -100,11 +100,16 @@ def load_parameters(file_name='parameters.txt'):
         parameters = {k: np.array(v) for k, v in serializable_parameters.items()}
         return parameters
 
-X, Y = load_planar_dataset()
+#Load the Data Set
+# X, Y = load_planar_dataset()
+noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
+X, Y = gaussian_quantiles
+X = X.T
+Y = Y.reshape(1,-1)
 print('X.shape',X.shape)
 print('Y.shape',Y.shape)
 
-# Try out a Simple Neural Network with a single hidden layer
+# Initialize a Simple Neural Network class with a single hidden layer
 NN = Model(X,Y)
 
 # First Time running then comment out init
@@ -113,8 +118,10 @@ NN = Model(X,Y)
 # parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
 
 parameters = load_parameters()
-parameters = NN.model(X, Y, parameters, num_iterations=30000, print_cost=True)
-save_parameters(parameters)
+
+# Train the Neural Network
+# parameters = NN.model(X, Y, parameters, num_iterations=30000, print_cost=True)
+# save_parameters(parameters)
 
 # Plot the decision boundary
 plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X, Y)
