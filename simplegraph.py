@@ -5,6 +5,7 @@ import sklearn.datasets
 import sklearn.linear_model
 from planar_utils import plot_decision_boundary
 from simpleneuralnetwork import Model
+import json
 
 # Set the seed
 np.random.seed(2)
@@ -86,6 +87,18 @@ def trainOnLR(X, Y):
     print('Accuracy of logistic regression: %d ' % float((true1s + true0s)/float(Y.size)*100) +
         '% ' + "(percentage of correctly labelled datapoints)")
 
+def save_parameters(parameters, file_name='parameters.txt'):
+    with open(file_name, 'w') as file:
+        # Convert parameters to a JSON-serializable format
+        serializable_parameters = {k: v.tolist() for k, v in parameters.items()}
+        file.write(json.dumps(serializable_parameters, indent=4))
+
+def load_parameters(file_name='parameters.txt'):
+    with open(file_name, 'r') as file:
+        serializable_parameters = json.loads(file.read())
+        # Convert parameters back to numpy arrays
+        parameters = {k: np.array(v) for k, v in serializable_parameters.items()}
+        return parameters
 
 X, Y = load_planar_dataset()
 print('X.shape',X.shape)
@@ -93,7 +106,15 @@ print('Y.shape',Y.shape)
 
 # Try out a Simple Neural Network with a single hidden layer
 NN = Model(X,Y)
-parameters = NN.model(X, Y, 9, num_iterations=30000, print_cost=True)
+
+# First Time running then comment out init
+# n_x = NN.layer_sizes(X, Y)[0]
+# n_y = NN.layer_sizes(X, Y)[2]
+# parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
+
+parameters = load_parameters()
+parameters = NN.model(X, Y, parameters, num_iterations=30000, print_cost=True)
+save_parameters(parameters)
 
 # Plot the decision boundary
 plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X, Y)

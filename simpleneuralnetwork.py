@@ -12,12 +12,12 @@ class Model:
         self.X = X
         self.Y = Y
 
-    def initialize_parameters(self, n_x, n_h, n_y):
+    def initialize_parameters(self, n_x, n_y, n_h=5):
         """
         Argument:
         n_x -- size of the input layer
-        n_h -- size of the hidden layer
         n_y -- size of the output layer
+        n_h -- size of the hidden layer
 
         Returns:
         params -- python dictionary containing your parameters:
@@ -177,7 +177,7 @@ class Model:
         n_y = Y.shape[0]
         return (n_x, n_h, n_y)
 
-    def model(self, X, Y, n_h, num_iterations = 10000, print_cost=False):
+    def model(self, X, Y, parameters, num_iterations = 10000, print_cost=False):
         """
         Arguments:
         X -- dataset of shape (2, number of examples)
@@ -195,7 +195,7 @@ class Model:
         n_y = self.layer_sizes(X, Y)[2]
 
         # Initialize parameters
-        parameters = self.initialize_parameters(n_x, n_h, n_y)
+        # parameters = self.initialize_parameters(n_x, n_h, n_y)
 
         # Loop (gradient descent)
         for i in range(0, num_iterations):
