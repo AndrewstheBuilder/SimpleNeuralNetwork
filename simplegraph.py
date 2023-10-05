@@ -103,7 +103,7 @@ def load_parameters(file_name='parameters.txt'):
 #Load the Data Set
 # X, Y = load_planar_dataset()
 noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
-X, Y = gaussian_quantiles
+X, Y = noisy_moons
 X = X.T
 Y = Y.reshape(1,-1)
 print('X.shape',X.shape)
@@ -120,8 +120,8 @@ NN = Model(X,Y)
 parameters = load_parameters()
 
 # Train the Neural Network
-# parameters = NN.model(X, Y, parameters, num_iterations=30000, print_cost=True)
-# save_parameters(parameters)
+parameters = NN.model(X, Y, parameters, num_iterations=30000, print_cost=True)
+save_parameters(parameters)
 
 # Plot the decision boundary
 plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X, Y)
