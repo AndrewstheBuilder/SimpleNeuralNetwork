@@ -4,6 +4,7 @@ import sklearn
 import sklearn.datasets
 import sklearn.linear_model
 from planar_utils import plot_decision_boundary
+from simpleneuralnetwork import Model
 
 # Set the seed
 np.random.seed(2)
@@ -67,24 +68,39 @@ def visualize_dataset(X, Y):
 
     plt.show()
 
+def trainOnLR(X, Y):
+    # Train the logistic regression classifier
+    # Logistic Regression sets a baseline for our Neural Network to beat
+    clf = sklearn.linear_model.LogisticRegressionCV()
+    clf.fit(X.T, Y[0])
+
+    # Plot the decision boundary for logistic regression
+    plot_decision_boundary(lambda x: clf.predict(x), X, Y)
+    plt.show()
+    plt.title("Logistic Regression")
+
+    # Print accuracy
+    LR_predictions = clf.predict(X.T)
+    true1s = np.dot(Y, LR_predictions) # Correctly labeled 1s
+    true0s = np.dot(1-Y, 1-LR_predictions) # Correctly labeled 0s
+    print('Accuracy of logistic regression: %d ' % float((true1s + true0s)/float(Y.size)*100) +
+        '% ' + "(percentage of correctly labelled datapoints)")
+
 
 X, Y = load_planar_dataset()
 print('X.shape',X.shape)
 print('Y.shape',Y.shape)
 
-# Train the logistic regression classifier
-# Logistic Regression sets a baseline for our Neural Network to beat
-clf = sklearn.linear_model.LogisticRegressionCV()
-clf.fit(X.T, Y[0])
+# Try out a Simple Neural Network with a single hidden layer
+NN = Model(X,Y)
+parameters = NN.model(X, Y, 9, num_iterations=30000, print_cost=True)
 
-# Plot the decision boundary for logistic regression
-plot_decision_boundary(lambda x: clf.predict(x), X, Y)
+# Plot the decision boundary
+plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X, Y)
+plt.title("Decision Boundary for hidden layer size " + str(4))
 plt.show()
-plt.title("Logistic Regression")
 
 # Print accuracy
-LR_predictions = clf.predict(X.T)
-true1s = np.dot(Y, LR_predictions) # Correctly labeled 1s
-true0s = np.dot(1-Y, 1-LR_predictions) # Correctly labeled 0s
-print('Accuracy of logistic regression: %d ' % float((true1s + true0s)/float(Y.size)*100) +
-      '% ' + "(percentage of correctly labelled datapoints)")
+predictions = NN.predict(parameters, X)
+print ('Accuracy: %d' % float((np.dot(Y, predictions.T) + np.dot(1 - Y, 1 - predictions.T)) / float(Y.size) * 100) + '%')
+
