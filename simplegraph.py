@@ -8,7 +8,7 @@ from simpleneuralnetwork import Model
 import json
 
 # Set the seed
-np.random.seed(2)
+# np.random.seed(2)
 
 
 def load_planar_dataset():
@@ -27,8 +27,8 @@ def load_planar_dataset():
     for j in range(2):
         ix = range(N*j, N*(j+1))
         t = np.linspace(j*3.12, (j+1)*3.12, N) + \
-            np.random.randn(N)*0.2  # theta
-        r = a*np.sin(4*t) + np.random.randn(N)*0.2  # radius
+            np.random.randn(N)*1  # theta
+        r = a*np.sin(4*t) + np.random.randn(N)*0.5  # radius
         X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
         Y[ix] = j
     X = X.T
@@ -103,9 +103,8 @@ def load_parameters(file_name='parameters.txt'):
 #Load the Data Set
 # X, Y = load_planar_dataset()
 noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
-X, Y = blobs
-X = X.T
-Y = Y.reshape(1,-1)
+X, Y = noisy_circles
+X, Y = X.T, Y.reshape(1, Y.shape[0])
 print('X.shape',X.shape)
 print('Y.shape',Y.shape)
 
@@ -117,10 +116,11 @@ NN = Model(X,Y)
 # n_y = NN.layer_sizes(X, Y)[2]
 # parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
 
+# Load parameters if you are NOT running init()
 parameters = load_parameters()
 
 # Train the Neural Network
-# parameters = NN.model(X, Y, parameters, num_iterations=30000, print_cost=True)
+# parameters = NN.model(X, Y, parameters, num_iterations=1000, print_cost=True)
 # save_parameters(parameters)
 
 # Plot the decision boundary
