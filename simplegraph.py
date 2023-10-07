@@ -6,6 +6,7 @@ import sklearn.linear_model
 from planar_utils import plot_decision_boundary, load_extra_datasets
 from simpleneuralnetwork import Model
 import json
+from init_utils import load_dataset
 
 # Set the seed
 # np.random.seed(2)
@@ -69,6 +70,7 @@ def visualize_dataset(X, Y):
 
     plt.show()
 
+
 def trainOnLR(X, Y):
     # Train the logistic regression classifier
     # Logistic Regression sets a baseline for our Neural Network to beat
@@ -82,53 +84,64 @@ def trainOnLR(X, Y):
 
     # Print accuracy
     LR_predictions = clf.predict(X.T)
-    true1s = np.dot(Y, LR_predictions) # Correctly labeled 1s
-    true0s = np.dot(1-Y, 1-LR_predictions) # Correctly labeled 0s
+    true1s = np.dot(Y, LR_predictions)  # Correctly labeled 1s
+    true0s = np.dot(1-Y, 1-LR_predictions)  # Correctly labeled 0s
     print('Accuracy of logistic regression: %d ' % float((true1s + true0s)/float(Y.size)*100) +
-        '% ' + "(percentage of correctly labelled datapoints)")
+          '% ' + "(percentage of correctly labelled datapoints)")
+
 
 def save_parameters(parameters, file_name='parameters.txt'):
     with open(file_name, 'w') as file:
         # Convert parameters to a JSON-serializable format
-        serializable_parameters = {k: v.tolist() for k, v in parameters.items()}
+        serializable_parameters = {k: v.tolist()
+                                   for k, v in parameters.items()}
         file.write(json.dumps(serializable_parameters, indent=4))
+
 
 def load_parameters(file_name='parameters.txt'):
     with open(file_name, 'r') as file:
         serializable_parameters = json.loads(file.read())
         # Convert parameters back to numpy arrays
-        parameters = {k: np.array(v) for k, v in serializable_parameters.items()}
+        parameters = {k: np.array(v)
+                      for k, v in serializable_parameters.items()}
         return parameters
 
-#Load the Data Set
+
+# Load the Data Set
 # X, Y = load_planar_dataset()
-noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
-X, Y = noisy_circles
-X, Y = X.T, Y.reshape(1, Y.shape[0])
-print('X.shape',X.shape)
-print('Y.shape',Y.shape)
+# noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
+# X, Y = noisy_circles
+# X, Y = X.T, Y.reshape(1, Y.shape[0])
+X_train, Y_train, X_test, Y_test = load_dataset()
+print('X_train.shape', X_train.shape)
+print('Y_train.shape', Y_train.shape)
 
 # Initialize a Simple Neural Network class with a single hidden layer
-NN = Model(X,Y)
+NN = Model(X_train, Y_train)
 
 # First Time running then comment out init
-# n_x = NN.layer_sizes(X, Y)[0]
-# n_y = NN.layer_sizes(X, Y)[2]
-# parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
+n_x = NN.layer_sizes(X_train, Y_train)[0]
+n_y = NN.layer_sizes(X_train, Y_train)[2]
+parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
 
 # Load parameters if you are NOT running init()
 parameters = load_parameters()
 
 # Train the Neural Network
-# parameters = NN.model(X, Y, parameters, num_iterations=1000, print_cost=True)
+# parameters = NN.model(X_train, Y_train, parameters, num_iterations=10000, print_cost=True)
 # save_parameters(parameters)
 
 # Plot the decision boundary
-plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X, Y)
+plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_train, Y_train)
 plt.title("Decision Boundary for hidden layer size " + str(4))
 plt.show()
 
 # Print accuracy
-predictions = NN.predict(parameters, X)
-print ('Accuracy: %d' % float((np.dot(Y, predictions.T) + np.dot(1 - Y, 1 - predictions.T)) / float(Y.size) * 100) + '%')
-
+predictions = NN.predict(parameters, X_test)
+print('Y_test',Y_test)
+print('Y_test.shape', Y_test.shape)
+print('predictions.T.shape', predictions.T.shape)
+print('(np.dot(Y_test, predictions.T) + np.dot(1 - Y_test, 1 - predictions.T)',
+      (np.dot(Y_test, predictions.T) + np.dot(1 - Y_test, 1 - predictions.T)))
+print('Accuracy: %d' % float((np.dot(Y_test, predictions.T) +
+                              np.dot(1 - Y_test, 1 - predictions.T)) / float(Y_test.size) * 100) + '%')
