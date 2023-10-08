@@ -8,8 +8,8 @@ from simpleneuralnetwork import Model
 import json
 from init_utils import load_dataset
 
-# Set the seed
-# np.random.seed(2)
+# Set the random seed
+np.random.seed(2)
 
 
 def load_planar_dataset():
@@ -125,23 +125,45 @@ n_y = NN.layer_sizes(X_train, Y_train)[2]
 parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
 
 # Load parameters if you are NOT running init()
-parameters = load_parameters()
+# parameters = load_parameters()
 
 # Train the Neural Network
 # parameters = NN.model(X_train, Y_train, parameters, num_iterations=10000, print_cost=True)
 # save_parameters(parameters)
 
 # Plot the decision boundary
+# plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_train, Y_train)
+# plt.title("Decision Boundary for hidden layer size " + str(4))
+# plt.show()
+
+# Print accuracy
+# predictions = NN.predict(parameters, X_test)
+# Me trying to figure out exactly how that Accuracy Print statement was working
+# print('Y_test',Y_test)
+# print('Y_test.shape', Y_test.shape)
+# print('predictions.T.shape', predictions.T.shape)
+# print('(np.dot(Y_test, predictions.T) + np.dot(1 - Y_test, 1 - predictions.T)',
+#       (np.dot(Y_test, predictions.T) + np.dot(1 - Y_test, 1 - predictions.T)))
+# print('Accuracy: %d' % float((np.dot(Y_test, predictions.T) +
+#                              np.dot(1 - Y_test, 1 - predictions.T)) / float(Y_test.size) * 100) + '%')
+
+# Perform Regularization
+# Performing L2 Regularization has the following effect on a model:
+    # 1. Encourages weight values toward 0 (but not exactly 0)
+    # 2. Encourages the mean of the weights toward 0, with a normal (bell-shaped or Gaussian) distribution
+# Graph these^!
+lambd = 0.3
+
+# Train the model with regularization
+# parameters = NN.model(X_train, Y_train, parameters, lambd, num_iterations=10000, print_cost=True, L2_reg=True)
+# save_parameters(parameters, "parameters_L2Reg.txt")
+
+# Plot the decision boundary
 plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_train, Y_train)
 plt.title("Decision Boundary for hidden layer size " + str(4))
 plt.show()
 
-# Print accuracy
 predictions = NN.predict(parameters, X_test)
-print('Y_test',Y_test)
-print('Y_test.shape', Y_test.shape)
-print('predictions.T.shape', predictions.T.shape)
-print('(np.dot(Y_test, predictions.T) + np.dot(1 - Y_test, 1 - predictions.T)',
-      (np.dot(Y_test, predictions.T) + np.dot(1 - Y_test, 1 - predictions.T)))
+
 print('Accuracy: %d' % float((np.dot(Y_test, predictions.T) +
                               np.dot(1 - Y_test, 1 - predictions.T)) / float(Y_test.size) * 100) + '%')

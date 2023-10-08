@@ -60,7 +60,9 @@ class Model:
         cache = {"Z1": Z1,
                  "A1": A1,
                  "Z2": Z2,
-                 "A2": A2}
+                 "A2": A2,
+                 "W1": W1,
+                 "W2": W2}
 
         return A2, cache
 
@@ -85,6 +87,31 @@ class Model:
         # makes sure cost is the dimension we expect.
         cost = float(np.squeeze(cost))
         # E.g., turns [[17]] into 17
+
+        return cost
+
+    def compute_cost_with_regularization(self, A2, Y, parameters, lambd):
+        """
+        Implement the cost function with L2 regularization.
+        See formula (2) in Regularization project of Improving Deep Neural Networks Course
+
+        Arguments:
+        A2 -- post activation, output of forward propagation, of shape (output size, number of examples)
+        Y -- "true" labels vector, of shape (output size, number of examples)
+        parameters -- python dictionary containing parameters of the model
+
+        Returns:
+        cost - value of the regularized loss function (formula(2))
+        """
+        m = Y.shape[1]
+        W1 = parameters["W1"]
+        W2 = parameters["W2"]
+
+        cross_entropy_cost = self.compute_cost(A2, Y) # This gives the cross-entropy part of the cost
+
+        L2_regularization_cost = (np.sum(np.square(W1)) + np.sum(np.square(W2)))* 1/m * lambd/2
+
+        cost = cross_entropy_cost + L2_regularization_cost
 
         return cost
 
@@ -116,6 +143,42 @@ class Model:
         db2 = (1/m) * np.sum(dZ2, axis=1, keepdims=True)
         dZ1 = np.dot(W2.T, dZ2) * (1 - np.power(A1, 2))
         dW1 = (1/m) * np.dot(dZ1, X.T)
+        db1 = (1/m) * np.sum(dZ1, axis=1, keepdims=True)
+
+        grads = {"dW1": dW1,
+                "db1": db1,
+                "dW2": dW2,
+                "db2": db2}
+
+        return grads
+
+    def backward_propagation_with_regularization(self, X, Y, cache, lambd):
+        """
+        Implements the backward propagation of our baseline model to which we added an L2 regularization
+
+        Arguments:
+        X -- input dataset, of shape (input size, number of examples)
+        Y -- "true" labels vector, of shape (output size, number of examples)
+        cache -- cache output from forward_propagation()
+        lambd -- regularization hyperparameter, scalar
+
+        Returns:
+        gradients -- A dictionary with the gradients with respect to each parameter, activation and pre-activation variables
+        """
+        m = X.shape[1] # number of examples
+        # First, retrieve W1 and W2 from the dictionary "parameters".
+        W1 = cache["W1"]
+        W2 = cache["W2"]
+
+        # Retrieve also A1 and A2 from dictionary "cache".
+        A1 = cache["A1"]
+        A2 = cache["A2"]
+
+        dZ2 = A2 - Y
+        dW2 = (1/m) * np.dot(dZ2, A1.T) + lambd/m * W2
+        db2 = (1/m) * np.sum(dZ2, axis=1, keepdims=True)
+        dZ1 = np.dot(W2.T, dZ2) * (1 - np.power(A1, 2))
+        dW1 = (1/m) * np.dot(dZ1, X.T) + lambd/m * W1
         db1 = (1/m) * np.sum(dZ1, axis=1, keepdims=True)
 
         grads = {"dW1": dW1,
@@ -177,7 +240,7 @@ class Model:
         n_y = Y.shape[0]
         return (n_x, n_h, n_y)
 
-    def model(self, X, Y, parameters, num_iterations = 10000, print_cost=False):
+    def model(self, X, Y, parameters, lambd, num_iterations = 10000, print_cost=False, L2_reg = False):
         """
         Arguments:
         X -- dataset of shape (2, number of examples)
@@ -200,8 +263,12 @@ class Model:
         # Loop (gradient descent)
         for i in range(0, num_iterations):
             A2, cache = self.forward_propagation(X, parameters)
-            cost = self.compute_cost(A2, Y)
-            grads = self.backward_propagation(parameters, cache, X, Y)
+            if(L2_reg):
+                cost = self.compute_cost_with_regularization(A2, Y, parameters, lambd)
+                grads = self.backward_propagation_with_regularization(X, Y, cache, lambd)
+            else:
+                cost = self.compute_cost(A2, Y)
+                grads = self.backward_propagation(parameters, cache, X, Y)
             parameters = self.update_parameters(parameters, grads)
 
             # Print the cost every 1000 iterations
