@@ -120,9 +120,9 @@ print('Y_train.shape', Y_train.shape)
 NN = Model(X_train, Y_train)
 
 # First Time running then comment out init
-n_x = NN.layer_sizes(X_train, Y_train)[0]
-n_y = NN.layer_sizes(X_train, Y_train)[2]
-parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
+# n_x = NN.layer_sizes(X_train, Y_train)[0]
+# n_y = NN.layer_sizes(X_train, Y_train)[2]
+# parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
 
 # Load parameters if you are NOT running init()
 # parameters = load_parameters()
@@ -149,8 +149,9 @@ parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
 
 # Perform Regularization
 # Performing L2 Regularization has the following effect on a model:
-    # 1. Encourages weight values toward 0 (but not exactly 0)
-    # 2. Encourages the mean of the weights toward 0, with a normal (bell-shaped or Gaussian) distribution
+# [https://developers.google.com/machine-learning/crash-course/regularization-for-simplicity/lambda]
+# 1. Encourages weight values toward 0 (but not exactly 0)
+# 2. Encourages the mean of the weights toward 0, with a normal (bell-shaped or Gaussian) distribution
 # Graph these^!
 lambd = 0.4
 
@@ -158,15 +159,55 @@ lambd = 0.4
 # parameters = load_parameters('parameters_L2Reg.txt')
 
 # Train the model with regularization
-parameters = NN.model(X_train, Y_train, parameters, lambd, num_iterations=10000, print_cost=True, L2_reg=True)
-save_parameters(parameters, "parameters_L2Reg_lambd_"+str(lambd)+".txt")
+# parameters = NN.model(X_train, Y_train, parameters, lambd, num_iterations=10000, print_cost=True, L2_reg=True)
+# save_parameters(parameters, "parameters_L2Reg_lambd_"+str(lambd)+".txt")
 
 # Plot the decision boundary
-plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_train, Y_train)
-plt.title("Decision Boundary for hidden layer size " + str(4))
+# plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_train, Y_train)
+# plt.title("Decision Boundary for hidden layer size " + str(4))
+# plt.show()
+
+# predictions = NN.predict(parameters, X_test)
+
+# print('Accuracy: %d' % float((np.dot(Y_test, predictions.T) +
+#                               np.dot(1 - Y_test, 1 - predictions.T)) / float(Y_test.size) * 100) + '%')
+
+# Plot Histogram for Different Lambda values
+parameters_og = load_parameters('parameters.txt')
+parameters_03 = load_parameters('parameters_L2Reg_lambd_0.3.txt')
+parameters_04 = load_parameters('parameters_L2Reg_lambd_0.4.txt')
+parameters_05 = load_parameters('parameters_L2Reg_lambd_0.5.txt')
+
+datasets = [parameters_og, parameters_03, parameters_04, parameters_05]
+x_values = np.arange(1, 10)
+
+fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(15, 5))
+mean = []
+
+for i, ax in enumerate(axes):
+    if i == 4:
+        # Print Means
+        # You can see that its gradually going towards zero
+        print('mean',mean)
+        ax.bar(np.arange(1,5), mean, color='skyblue')
+        ax.set_title("Means for No L2 Reg to 0.5 lambd Respectively")
+    else:
+        # Generate Bar charts 1-4
+        W2 = datasets[i]["W2"][0]
+        W2_abs = np.abs(W2)
+        # print('datasets[i]["W2"][0]',datasets[i]["W2"][0])
+        # print('W2_abs',W2_abs)
+        ax.bar(x_values, W2, color='skyblue')
+        ax.axhline(0, color='black', linewidth=0.5)
+        ax.set_xlim(0, 10)
+        if(i == 0):
+            ax.set_title(f"No L2 Regularization")
+        else:
+            ax.set_title(f"Lambd 0.{i+2}")
+        ax.set_xlabel("X axis")
+        if i == 0:  # Only set the y-label for the first plot for clarity
+            ax.set_ylabel("W2 Value")
+        mean.append(np.mean(W2_abs))
+
+plt.tight_layout()
 plt.show()
-
-predictions = NN.predict(parameters, X_test)
-
-print('Accuracy: %d' % float((np.dot(Y_test, predictions.T) +
-                              np.dot(1 - Y_test, 1 - predictions.T)) / float(Y_test.size) * 100) + '%')
