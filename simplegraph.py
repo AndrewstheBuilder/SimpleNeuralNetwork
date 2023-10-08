@@ -152,11 +152,14 @@ parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
     # 1. Encourages weight values toward 0 (but not exactly 0)
     # 2. Encourages the mean of the weights toward 0, with a normal (bell-shaped or Gaussian) distribution
 # Graph these^!
-lambd = 0.3
+lambd = 0.4
+
+# Load pretrained parameters for Reg Model
+# parameters = load_parameters('parameters_L2Reg.txt')
 
 # Train the model with regularization
-# parameters = NN.model(X_train, Y_train, parameters, lambd, num_iterations=10000, print_cost=True, L2_reg=True)
-# save_parameters(parameters, "parameters_L2Reg.txt")
+parameters = NN.model(X_train, Y_train, parameters, lambd, num_iterations=10000, print_cost=True, L2_reg=True)
+save_parameters(parameters, "parameters_L2Reg_lambd_"+str(lambd)+".txt")
 
 # Plot the decision boundary
 plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_train, Y_train)
