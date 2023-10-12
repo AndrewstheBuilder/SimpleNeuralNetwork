@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 import sklearn
 import sklearn.datasets
 import sklearn.linear_model
-from planar_utils import plot_decision_boundary, sigmoid, load_planar_dataset, load_extra_datasets
-from visualize_nn import NNVisualizer
+
+# Import Utils
+from utils.planar_utils import plot_decision_boundary, sigmoid, load_planar_dataset, load_extra_datasets
+from utils.visualize_nn import NNVisualizer
 
 
 class Model:

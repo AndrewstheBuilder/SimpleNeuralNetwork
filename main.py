@@ -3,11 +3,13 @@ import numpy as np
 import sklearn
 import sklearn.datasets
 import sklearn.linear_model
-from planar_utils import plot_decision_boundary, load_extra_datasets
 from simpleneuralnetwork import Model
 import json
-from init_utils import load_dataset
-from visualize_nn import NNVisualizer
+
+# Import Utils
+from utils.planar_utils import plot_decision_boundary, load_extra_datasets
+from utils.init_utils import load_dataset
+from utils.visualize_nn import NNVisualizer
 
 # Set the random seed
 np.random.seed(2)
