@@ -5,12 +5,14 @@ import sklearn
 import sklearn.datasets
 import sklearn.linear_model
 from planar_utils import plot_decision_boundary, sigmoid, load_planar_dataset, load_extra_datasets
+from visualize_nn import NNVisualizer
 
 
 class Model:
     def __init__(self, X, Y):
         self.X = X
         self.Y = Y
+        self.NNVisualizer = NNVisualizer(ncols=4)
 
     def initialize_parameters(self, n_x, n_y, n_h=5):
         """
@@ -66,7 +68,6 @@ class Model:
 
         return A2, cache
 
-
     def compute_cost(self, A2, Y):
         """
         Computes the cross-entropy cost given in equation (13)
@@ -81,7 +82,8 @@ class Model:
         """
 
         m = Y.shape[1]  # number of examples
-        logprobs = np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))
+        logprobs = np.multiply(np.log(A2), Y) + \
+            np.multiply(np.log(1-A2), (1-Y))
         cost = -(1/m) * np.sum(logprobs)
 
         # makes sure cost is the dimension we expect.
@@ -107,9 +109,11 @@ class Model:
         W1 = parameters["W1"]
         W2 = parameters["W2"]
 
-        cross_entropy_cost = self.compute_cost(A2, Y) # This gives the cross-entropy part of the cost
+        # This gives the cross-entropy part of the cost
+        cross_entropy_cost = self.compute_cost(A2, Y)
 
-        L2_regularization_cost = (np.sum(np.square(W1)) + np.sum(np.square(W2)))* 1/m * lambd/2
+        L2_regularization_cost = (
+            np.sum(np.square(W1)) + np.sum(np.square(W2))) * 1/m * lambd/2
 
         cost = cross_entropy_cost + L2_regularization_cost
 
@@ -146,9 +150,9 @@ class Model:
         db1 = (1/m) * np.sum(dZ1, axis=1, keepdims=True)
 
         grads = {"dW1": dW1,
-                "db1": db1,
-                "dW2": dW2,
-                "db2": db2}
+                 "db1": db1,
+                 "dW2": dW2,
+                 "db2": db2}
 
         return grads
 
@@ -165,7 +169,7 @@ class Model:
         Returns:
         gradients -- A dictionary with the gradients with respect to each parameter, activation and pre-activation variables
         """
-        m = X.shape[1] # number of examples
+        m = X.shape[1]  # number of examples
         # First, retrieve W1 and W2 from the dictionary "parameters".
         W1 = cache["W1"]
         W2 = cache["W2"]
@@ -182,13 +186,13 @@ class Model:
         db1 = (1/m) * np.sum(dZ1, axis=1, keepdims=True)
 
         grads = {"dW1": dW1,
-                "db1": db1,
-                "dW2": dW2,
-                "db2": db2}
+                 "db1": db1,
+                 "dW2": dW2,
+                 "db2": db2}
 
         return grads
 
-    def update_parameters(self, parameters, grads, learning_rate = 1.2):
+    def update_parameters(self, parameters, grads, learning_rate=1.2):
         """
         Updates parameters using the gradient descent update rule given above
 
@@ -218,9 +222,9 @@ class Model:
         b2 = b2 - learning_rate * db2
 
         parameters = {"W1": W1,
-                    "b1": b1,
-                    "W2": W2,
-                    "b2": b2}
+                      "b1": b1,
+                      "W2": W2,
+                      "b2": b2}
 
         return parameters
 
@@ -236,11 +240,11 @@ class Model:
         n_y -- the size of the output layer
         """
         n_x = X.shape[0]
-        n_h=4
+        n_h = 4
         n_y = Y.shape[0]
         return (n_x, n_h, n_y)
 
-    def model(self, X, Y, parameters, lambd, num_iterations = 10000, print_cost=False, L2_reg = False):
+    def model(self, X, Y, parameters, n_h, lambd, num_iterations=10000, print_cost=False):
         """
         Arguments:
         X -- dataset of shape (2, number of examples)
@@ -257,15 +261,20 @@ class Model:
         n_x = self.layer_sizes(X, Y)[0]
         n_y = self.layer_sizes(X, Y)[2]
 
-        # Initialize parameters
-        # parameters = self.initialize_parameters(n_x, n_h, n_y)
+        if(parameters == None):
+            # Initialize parameters
+            parameters = self.initialize_parameters(n_x, n_y, n_h)
 
+        self.NNVisualizer.draw_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
+                                       parameters["b1"], parameters["b2"]])
         # Loop (gradient descent)
         for i in range(0, num_iterations):
             A2, cache = self.forward_propagation(X, parameters)
-            if(L2_reg):
-                cost = self.compute_cost_with_regularization(A2, Y, parameters, lambd)
-                grads = self.backward_propagation_with_regularization(X, Y, cache, lambd)
+            if(lambd != None):
+                cost = self.compute_cost_with_regularization(
+                    A2, Y, parameters, lambd)
+                grads = self.backward_propagation_with_regularization(
+                    X, Y, cache, lambd)
             else:
                 cost = self.compute_cost(A2, Y)
                 grads = self.backward_propagation(parameters, cache, X, Y)
@@ -273,7 +282,9 @@ class Model:
 
             # Print the cost every 1000 iterations
             if print_cost and i % 1000 == 0:
-                print ("Cost after iteration %i: %f" %(i, cost))
+                print("Cost after iteration %i: %f" % (i, cost))
+                self.NNVisualizer.draw_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
+                                parameters["b1"], parameters["b2"]])
 
         return parameters
 
