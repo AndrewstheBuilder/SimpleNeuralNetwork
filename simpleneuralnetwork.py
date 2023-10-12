@@ -267,8 +267,8 @@ class Model:
             # Initialize parameters
             parameters = self.initialize_parameters(n_x, n_y, n_h)
 
-        self.NNVisualizer.draw_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
-                                       parameters["b1"], parameters["b2"]])
+        self.NNVisualizer.create_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
+            parameters["b1"], parameters["b2"]], iteration_num=-1)
         # Loop (gradient descent)
         for i in range(0, num_iterations):
             A2, cache = self.forward_propagation(X, parameters)
@@ -285,9 +285,9 @@ class Model:
             # Print the cost every 1000 iterations
             if print_cost and i % 1000 == 0:
                 print("Cost after iteration %i: %f" % (i, cost))
-            if i % 100 == 0:
-                self.NNVisualizer.draw_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
-                                parameters["b1"], parameters["b2"]])
+                self.NNVisualizer.create_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
+                    parameters["b1"], parameters["b2"]], iteration_num=i)
+        self.NNVisualizer.draw_heatmaps()
 
         return parameters
 

@@ -169,7 +169,7 @@ NN = Model(X_train, Y_train)
 n_h = 7
 parameters = None
 lambd = None
-parameters = NN.model(X_train, Y_train, parameters, n_h, lambd, num_iterations=30000, print_cost=True)
+parameters = NN.model(X_train, Y_train, parameters, n_h, lambd, num_iterations=10000, print_cost=True)
 
 # Train the Neural Network
 # n_h = 9

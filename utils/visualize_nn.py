@@ -1,12 +1,18 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+from matplotlib.widgets import Button
 import numpy as np
+import tkinter as tk
 
 class NNVisualizer:
     def __init__(self, ncols=5):
-        self.fig, self.axes = plt.subplots(nrows=1, ncols=ncols, figsize=(15, 5))
+        self.ncols = ncols
         plt.tight_layout()
         plt.ion()
+        self.figures = []
+        self.index = 0
 
     def draw_toy_heatmap(self):
         fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(15, 5))
@@ -22,14 +28,38 @@ class NNVisualizer:
 
         plt.show()
 
-    def draw_heatmap(self, Ws, Bs):
-        for i, (W, B) in enumerate(zip(Ws, Bs)):
-            ax_W = self.axes[2*i]
-            ax_B = self.axes[2*i + 1]
+    def create_heatmap(self, Ws, Bs, iteration_num):
+        self.figures.append((Ws, Bs, iteration_num))  # Store the data instead of the figure
 
-            # Clear the current content of the axes
-            ax_W.clear()
-            ax_B.clear()
+    def draw_heatmaps(self):
+        self.root = tk.Tk()
+        # Create a single figure and canvas and keep them
+        self.fig = Figure(figsize=(15, 6))
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(side=tk.BOTTOM, fill=tk.X)
+
+        btn_prev = tk.Button(button_frame, text='Previous', command=self.prev)
+        btn_prev.pack(side=tk.LEFT)
+
+        btn_next = tk.Button(button_frame, text='Next', command=self.next)
+        btn_next.pack(side=tk.LEFT)
+
+        self.update_plot()  # Update the plot when the window is first created
+        self.root.mainloop()
+
+    def update_plot(self):
+        # Clear the current content of the figure
+        self.fig.clf()
+        Ws, Bs, iteration_num = self.figures[self.index]  # Get the data for the current plot
+        axes = self.fig.subplots(nrows=1, ncols=self.ncols)  # Add new subplots to the figure
+
+        for i, (W, B) in enumerate(zip(Ws, Bs)):
+            ax_W = axes[2*i]
+            ax_B = axes[2*i + 1]
 
             # Creating a heatmap for W
             sns.heatmap(W, annot=True, cmap="coolwarm", linewidths=0.5, ax=ax_W, cbar=False)
@@ -44,8 +74,19 @@ class NNVisualizer:
             ax_B.set_xlabel("Bias")
             ax_B.yaxis.set_visible(False)  # Hide y-axis for bias heatmap
 
+        # Add a title below the plots
+        if(iteration_num == -1):
+            self.fig.text(0.5, 0.01, f'Init', ha='center', va='center', fontsize=16)
+        else:
+            self.fig.text(0.5, 0.01, f'Iteration: {iteration_num}', ha='center', va='center', fontsize=16)
 
-        plt.tight_layout()
-        plt.draw()
-        plt.pause(0.01)  # Add a short pause to allow the plot to update
+        self.canvas.draw()  # Draw the updated figure on the canvas
 
+
+    def next(self, *args):
+        self.index = (self.index + 1) % len(self.figures)
+        self.update_plot()
+
+    def prev(self, *args):
+        self.index = (self.index - 1) % len(self.figures)
+        self.update_plot()
