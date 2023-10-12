@@ -3,12 +3,16 @@ import numpy as np
 import sklearn
 import sklearn.datasets
 import sklearn.linear_model
-from planar_utils import plot_decision_boundary, load_extra_datasets
 from simpleneuralnetwork import Model
 import json
 
-# Set the seed
-# np.random.seed(2)
+# Import Utils
+from utils.planar_utils import plot_decision_boundary, load_extra_datasets
+from utils.init_utils import load_dataset
+from utils.visualize_nn import NNVisualizer
+
+# Set the random seed
+np.random.seed(2)
 
 
 def load_planar_dataset():
@@ -69,6 +73,7 @@ def visualize_dataset(X, Y):
 
     plt.show()
 
+
 def trainOnLR(X, Y):
     # Train the logistic regression classifier
     # Logistic Regression sets a baseline for our Neural Network to beat
@@ -82,53 +87,94 @@ def trainOnLR(X, Y):
 
     # Print accuracy
     LR_predictions = clf.predict(X.T)
-    true1s = np.dot(Y, LR_predictions) # Correctly labeled 1s
-    true0s = np.dot(1-Y, 1-LR_predictions) # Correctly labeled 0s
+    true1s = np.dot(Y, LR_predictions)  # Correctly labeled 1s
+    true0s = np.dot(1-Y, 1-LR_predictions)  # Correctly labeled 0s
     print('Accuracy of logistic regression: %d ' % float((true1s + true0s)/float(Y.size)*100) +
-        '% ' + "(percentage of correctly labelled datapoints)")
+          '% ' + "(percentage of correctly labelled datapoints)")
+
 
 def save_parameters(parameters, file_name='parameters.txt'):
     with open(file_name, 'w') as file:
         # Convert parameters to a JSON-serializable format
-        serializable_parameters = {k: v.tolist() for k, v in parameters.items()}
+        serializable_parameters = {k: v.tolist()
+                                   for k, v in parameters.items()}
         file.write(json.dumps(serializable_parameters, indent=4))
+
 
 def load_parameters(file_name='parameters.txt'):
     with open(file_name, 'r') as file:
         serializable_parameters = json.loads(file.read())
         # Convert parameters back to numpy arrays
-        parameters = {k: np.array(v) for k, v in serializable_parameters.items()}
+        parameters = {k: np.array(v)
+                      for k, v in serializable_parameters.items()}
         return parameters
 
-#Load the Data Set
+def plot_histogram_for_reg():
+    """
+    Plot Histogram for different lambda values
+    """
+    # Plot Histogram for Different Lambda values
+    parameters_og = load_parameters('parameters.txt')
+    parameters_03 = load_parameters('parameters_L2Reg_lambd_0.3.txt')
+    parameters_04 = load_parameters('parameters_L2Reg_lambd_0.4.txt')
+    parameters_05 = load_parameters('parameters_L2Reg_lambd_0.5.txt')
+
+    datasets = [parameters_og, parameters_03, parameters_04, parameters_05]
+    x_values = np.arange(1, 10)
+
+    fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(15, 5))
+    mean = []
+
+    for i, ax in enumerate(axes):
+        if i == 4:
+            # Print Means
+            # You can see that its gradually going towards zero
+            print('mean',mean)
+            ax.bar(np.arange(1,5), mean, color='skyblue')
+            ax.set_title("Means for No L2 Reg to 0.5 lambd Respectively")
+        else:
+            # Generate Bar charts 1-4
+            W2 = datasets[i]["W2"][0]
+            W2_abs = np.abs(W2)
+            # print('datasets[i]["W2"][0]',datasets[i]["W2"][0])
+            # print('W2_abs',W2_abs)
+            ax.bar(x_values, W2, color='skyblue')
+            ax.axhline(0, color='black', linewidth=0.5)
+            ax.set_xlim(0, 10)
+            if(i == 0):
+                ax.set_title(f"No L2 Regularization")
+            else:
+                ax.set_title(f"Lambd 0.{i+2}")
+            ax.set_xlabel("X axis")
+            if i == 0:  # Only set the y-label for the first plot for clarity
+                ax.set_ylabel("W2 Value")
+            mean.append(np.mean(W2_abs))
+
+    plt.tight_layout()
+    plt.show()
+
+# Load the Data Set
 # X, Y = load_planar_dataset()
-noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
-X, Y = noisy_circles
-X, Y = X.T, Y.reshape(1, Y.shape[0])
-print('X.shape',X.shape)
-print('Y.shape',Y.shape)
+# noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
+# X, Y = noisy_circles
+# X, Y = X.T, Y.reshape(1, Y.shape[0])
+X_train, Y_train, X_test, Y_test = load_dataset()
+print('X_train.shape', X_train.shape)
+print('Y_train.shape', Y_train.shape)
 
 # Initialize a Simple Neural Network class with a single hidden layer
-NN = Model(X,Y)
+NN = Model(X_train, Y_train)
 
-# First Time running then comment out init
-# n_x = NN.layer_sizes(X, Y)[0]
-# n_y = NN.layer_sizes(X, Y)[2]
-# parameters = NN.initialize_parameters(n_x, n_y, n_h=9)
-
-# Load parameters if you are NOT running init()
-parameters = load_parameters()
+# Initialize new parameters
+n_h = 7
+parameters = None
+lambd = None
+parameters = NN.model(X_train, Y_train, parameters, n_h, lambd, num_iterations=30000, print_cost=True)
 
 # Train the Neural Network
-# parameters = NN.model(X, Y, parameters, num_iterations=1000, print_cost=True)
+# n_h = 9
+# parameters = load_parameters()
+# parameters = NN.model(X_train, Y_train, parameters, n_h, num_iterations=10000, print_cost=True)
+
+
 # save_parameters(parameters)
-
-# Plot the decision boundary
-plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X, Y)
-plt.title("Decision Boundary for hidden layer size " + str(4))
-plt.show()
-
-# Print accuracy
-predictions = NN.predict(parameters, X)
-print ('Accuracy: %d' % float((np.dot(Y, predictions.T) + np.dot(1 - Y, 1 - predictions.T)) / float(Y.size) * 100) + '%')
-
