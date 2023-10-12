@@ -285,7 +285,7 @@ class Model:
             # Print the cost every 1000 iterations
             if print_cost and i % 1000 == 0:
                 print("Cost after iteration %i: %f" % (i, cost))
-            if i % 5000 == 0:
+            if i % 100 == 0:
                 self.NNVisualizer.draw_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
                                 parameters["b1"], parameters["b2"]])
 
