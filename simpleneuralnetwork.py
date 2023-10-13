@@ -293,7 +293,7 @@ class Model:
                 else:
                     # On first iteration there will not be anything in the cost_list
                     prev_cost_list = []
-                prev_cost_list.append({i:cost})
+                prev_cost_list.append({i: cost})
                 self.cost_list.append(prev_cost_list)
                 self.NNVisualizer.create_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
                     parameters["b1"], parameters["b2"]], iteration_num=i)

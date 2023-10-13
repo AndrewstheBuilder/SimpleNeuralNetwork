@@ -6,6 +6,7 @@ from matplotlib.widgets import Button
 import numpy as np
 import tkinter as tk
 
+
 class NNVisualizer:
     def __init__(self, ncols=5):
         self.ncols = ncols
@@ -18,7 +19,7 @@ class NNVisualizer:
         fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(15, 5))
 
         for i, ax in enumerate(axes):
-            W1 = np.random.randn(9,1)
+            W1 = np.random.randn(9, 1)
             # Creating a heatmap for W1
             sns.heatmap(W1, annot=True, cmap="coolwarm", linewidths=0.5, ax=ax)
             ax.set_title("Heatmap of W1", fontsize=16)
@@ -29,8 +30,8 @@ class NNVisualizer:
         plt.show()
 
     def create_heatmap(self, Ws, Bs, iteration_num):
-        # print('cost_list',cost_list)
-        self.figures.append((Ws, Bs, iteration_num))  # Store the data instead of the figure
+        # Store the data instead of the figure
+        self.figures.append((Ws, Bs, iteration_num))
 
     def draw_heatmaps(self, cost_list):
         self.cost_list = cost_list
@@ -56,26 +57,30 @@ class NNVisualizer:
     def update_plot(self):
         # Clear the current content of the figure
         self.fig.clf()
-        Ws, Bs, iteration_num = self.figures[self.index]  # Get the data for the current plot
+        # Get the data for the current plot
+        Ws, Bs, iteration_num = self.figures[self.index]
         if(self.index == 0):
             current_cost = []
         else:
             current_cost = self.cost_list[self.index-1]
-        axes = self.fig.subplots(nrows=1, ncols=self.ncols)  # Add new subplots to the figure
+        # Add new subplots to the figure
+        axes = self.fig.subplots(nrows=1, ncols=self.ncols)
 
         for i, (W, B) in enumerate(zip(Ws, Bs)):
             ax_W = axes[2*i]
             ax_B = axes[2*i + 1]
 
             # Creating a heatmap for W
-            sns.heatmap(W, annot=True, cmap="coolwarm", linewidths=0.5, ax=ax_W, cbar=False)
+            sns.heatmap(W, annot=True, cmap="coolwarm",
+                        linewidths=0.5, ax=ax_W, cbar=False)
             ax_W.set_title(f"Heatmap of W{i+1}", fontsize=16)
             ax_W.set_xlabel("Input Neuron")
             if i == 0:
                 ax_W.set_ylabel("Hidden Layer Neuron")
 
             # Creating a heatmap for B
-            sns.heatmap(np.atleast_2d(B), annot=True, cmap="coolwarm", linewidths=0.5, ax=ax_B, cbar=False)
+            sns.heatmap(np.atleast_2d(B), annot=True, cmap="coolwarm",
+                        linewidths=0.5, ax=ax_B, cbar=False)
             ax_B.set_title(f"Heatmap of B{i+1}", fontsize=16)
             ax_B.set_xlabel("Bias")
             ax_B.yaxis.set_visible(False)  # Hide y-axis for bias heatmap
@@ -87,7 +92,6 @@ class NNVisualizer:
         ax_cost.set_ylabel("Cost")
 
         # Extract x and y values
-        # print('cost_list for' + str(self.index) + ' '+ ','.join(map(str, current_cost)))
         x = [list(d.keys())[0] for d in current_cost]
         y = [list(d.values())[0] for d in current_cost]
 
@@ -99,9 +103,11 @@ class NNVisualizer:
 
         # Add a title below the plots
         if(iteration_num == -1):
-            self.fig.text(0.5, 0.01, f'Init', ha='center', va='center', fontsize=16)
+            self.fig.text(0.5, 0.01, f'Init', ha='center',
+                          va='center', fontsize=16)
         else:
-            self.fig.text(0.5, 0.01, f'Iteration: {iteration_num}', ha='center', va='center', fontsize=16)
+            self.fig.text(
+                0.5, 0.01, f'Iteration: {iteration_num}', ha='center', va='center', fontsize=16)
 
         # Adjust layout
         self.fig.tight_layout()
