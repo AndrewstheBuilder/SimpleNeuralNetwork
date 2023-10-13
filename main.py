@@ -179,5 +179,18 @@ parameters = NN.model(X_train, Y_train, parameters, n_h,
 # parameters = load_parameters()
 # parameters = NN.model(X_train, Y_train, parameters, n_h, num_iterations=10000, print_cost=True)
 
-
+# Save trained parameters
 # save_parameters(parameters)
+
+# Print accuracy based on predictions on the test set
+predictions = NN.predict(parameters, X_test)
+print('Accuracy: %d' % float((np.dot(Y_test, predictions.T) +
+                             np.dot(1 - Y_test, 1 - predictions.T)) / float(Y_test.size) * 100) + '%')
+
+# Plot the decision boundary
+plt.ioff()  # Turn off interactive mode
+plt.figure()  # Creating a new figure for the decision boundary
+plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_test, Y_test)
+plt.title("Decision Boundary for hidden layer size " + str(4))
+plt.show(block=True)
+plt.ion()  # Turn interactive mode back on, if needed for later
