@@ -9,10 +9,10 @@ import tkinter as tk
 class NNVisualizer:
     def __init__(self, ncols=5):
         self.ncols = ncols
-        plt.tight_layout()
         plt.ion()
         self.figures = []
         self.index = 0
+        self.cost_list = []
 
     def draw_toy_heatmap(self):
         fig, axes = plt.subplots(nrows=1, ncols=5, figsize=(15, 5))
@@ -29,9 +29,11 @@ class NNVisualizer:
         plt.show()
 
     def create_heatmap(self, Ws, Bs, iteration_num):
+        # print('cost_list',cost_list)
         self.figures.append((Ws, Bs, iteration_num))  # Store the data instead of the figure
 
-    def draw_heatmaps(self):
+    def draw_heatmaps(self, cost_list):
+        self.cost_list = cost_list
         self.root = tk.Tk()
         # Create a single figure and canvas and keep them
         self.fig = Figure(figsize=(15, 6))
@@ -55,6 +57,10 @@ class NNVisualizer:
         # Clear the current content of the figure
         self.fig.clf()
         Ws, Bs, iteration_num = self.figures[self.index]  # Get the data for the current plot
+        if(self.index == 0):
+            current_cost = []
+        else:
+            current_cost = self.cost_list[self.index-1]
         axes = self.fig.subplots(nrows=1, ncols=self.ncols)  # Add new subplots to the figure
 
         for i, (W, B) in enumerate(zip(Ws, Bs)):
@@ -74,14 +80,33 @@ class NNVisualizer:
             ax_B.set_xlabel("Bias")
             ax_B.yaxis.set_visible(False)  # Hide y-axis for bias heatmap
 
+        # Plot the cost last
+        ax_cost = axes[self.ncols-1]
+        ax_cost.set_xlabel("Iteration")
+        ax_cost.yaxis.set_visible(True)
+        ax_cost.set_ylabel("Cost")
+
+        # Extract x and y values
+        # print('cost_list for' + str(self.index) + ' '+ ','.join(map(str, current_cost)))
+        x = [list(d.keys())[0] for d in current_cost]
+        y = [list(d.values())[0] for d in current_cost]
+
+        # Plot the data using the ax object
+        ax_cost.plot(x, y, marker='x')
+
+        # Title of the plot using the ax object
+        ax_cost.set_title('Cost over iterations', fontsize=16)
+
         # Add a title below the plots
         if(iteration_num == -1):
             self.fig.text(0.5, 0.01, f'Init', ha='center', va='center', fontsize=16)
         else:
             self.fig.text(0.5, 0.01, f'Iteration: {iteration_num}', ha='center', va='center', fontsize=16)
 
-        self.canvas.draw()  # Draw the updated figure on the canvas
+        # Adjust layout
+        self.fig.tight_layout()
 
+        self.canvas.draw()  # Draw the updated figure on the canvas
 
     def next(self, *args):
         self.index = (self.index + 1) % len(self.figures)

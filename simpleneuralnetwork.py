@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import sklearn
 import sklearn.datasets
 import sklearn.linear_model
+import copy
 
 # Import Utils
 from utils.planar_utils import plot_decision_boundary, sigmoid, load_planar_dataset, load_extra_datasets
@@ -14,7 +15,8 @@ class Model:
     def __init__(self, X, Y):
         self.X = X
         self.Y = Y
-        self.NNVisualizer = NNVisualizer(ncols=4)
+        self.NNVisualizer = NNVisualizer(ncols=5)
+        self.cost_list = []
 
     def initialize_parameters(self, n_x, n_y, n_h=5):
         """
@@ -283,11 +285,19 @@ class Model:
             parameters = self.update_parameters(parameters, grads)
 
             # Print the cost every 1000 iterations
-            if print_cost and i % 1000 == 0:
+            if print_cost and i % 500 == 0:
                 print("Cost after iteration %i: %f" % (i, cost))
+                if(len(self.cost_list) > 0):
+                    # print('self.cost_list[-1]',self.cost_list[-1])
+                    prev_cost_list = copy.deepcopy(self.cost_list[-1])
+                else:
+                    # On first iteration there will not be anything in the cost_list
+                    prev_cost_list = []
+                prev_cost_list.append({i:cost})
+                self.cost_list.append(prev_cost_list)
                 self.NNVisualizer.create_heatmap(Ws=[parameters["W1"], parameters["W2"].T], Bs=[
                     parameters["b1"], parameters["b2"]], iteration_num=i)
-        self.NNVisualizer.draw_heatmaps()
+        self.NNVisualizer.draw_heatmaps(self.cost_list)
 
         return parameters
 
