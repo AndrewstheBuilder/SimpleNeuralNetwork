@@ -109,6 +109,7 @@ def load_parameters(file_name='parameters.txt'):
                       for k, v in serializable_parameters.items()}
         return parameters
 
+
 def plot_histogram_for_reg():
     """
     Plot Histogram for different lambda values
@@ -129,8 +130,8 @@ def plot_histogram_for_reg():
         if i == 4:
             # Print Means
             # You can see that its gradually going towards zero
-            print('mean',mean)
-            ax.bar(np.arange(1,5), mean, color='skyblue')
+            print('mean', mean)
+            ax.bar(np.arange(1, 5), mean, color='skyblue')
             ax.set_title("Means for No L2 Reg to 0.5 lambd Respectively")
         else:
             # Generate Bar charts 1-4
@@ -153,6 +154,7 @@ def plot_histogram_for_reg():
     plt.tight_layout()
     plt.show()
 
+
 # Load the Data Set
 # X, Y = load_planar_dataset()
 # noisy_circles, noisy_moons, blobs, gaussian_quantiles, no_structure = load_extra_datasets()
@@ -169,12 +171,26 @@ NN = Model(X_train, Y_train)
 n_h = 7
 parameters = None
 lambd = None
-parameters = NN.model(X_train, Y_train, parameters, n_h, lambd, num_iterations=30000, print_cost=True)
+parameters = NN.model(X_train, Y_train, parameters, n_h,
+                      lambd, num_iterations=10000, print_cost=True)
 
 # Train the Neural Network
 # n_h = 9
 # parameters = load_parameters()
 # parameters = NN.model(X_train, Y_train, parameters, n_h, num_iterations=10000, print_cost=True)
 
-
+# Save trained parameters
 # save_parameters(parameters)
+
+# Print accuracy based on predictions on the test set
+predictions = NN.predict(parameters, X_test)
+print('Accuracy: %d' % float((np.dot(Y_test, predictions.T) +
+                             np.dot(1 - Y_test, 1 - predictions.T)) / float(Y_test.size) * 100) + '%')
+
+# Plot the decision boundary
+plt.ioff()  # Turn off interactive mode
+plt.figure()  # Creating a new figure for the decision boundary
+plot_decision_boundary(lambda x: NN.predict(parameters, x.T), X_test, Y_test)
+plt.title("Decision Boundary for hidden layer size " + str(4))
+plt.show(block=True)
+plt.ion()  # Turn interactive mode back on, if needed for later
